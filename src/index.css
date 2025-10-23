@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* GamePlanAI Cyber-Gaming Theme */
+    --background: 217 19% 5%;
+    --foreground: 180 100% 90%;
+
+    --card: 215 20% 8%;
+    --card-foreground: 180 100% 90%;
+
+    --popover: 215 20% 8%;
+    --popover-foreground: 180 100% 90%;
+
+    --primary: 177 70% 70%;
+    --primary-foreground: 217 19% 5%;
+
+    --secondary: 176 51% 55%;
+    --secondary-foreground: 217 19% 5%;
+
+    --muted: 215 15% 15%;
+    --muted-foreground: 180 20% 65%;
+
+    --accent: 177 100% 60%;
+    --accent-foreground: 217 19% 5%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 180 100% 90%;
+
+    --border: 215 15% 20%;
+    --input: 215 15% 15%;
+    --ring: 177 70% 70%;
+
+    --radius: 0.75rem;
+
+    /* Custom gaming colors */
+    --neon-cyan: 177 100% 70%;
+    --neon-teal: 176 51% 55%;
+    --deep-space: 217 19% 5%;
+    --slate-dark: 215 20% 12%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(177 70% 70%) 0%, hsl(176 51% 55%) 100%);
+    --gradient-glow: linear-gradient(180deg, hsl(177 70% 70% / 0.1) 0%, transparent 100%);
+    
+    /* Shadows */
+    --shadow-neon: 0 0 20px hsl(177 70% 70% / 0.3), 0 0 40px hsl(177 70% 70% / 0.1);
+    --shadow-card: 0 10px 30px -5px hsl(217 19% 5% / 0.5);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
