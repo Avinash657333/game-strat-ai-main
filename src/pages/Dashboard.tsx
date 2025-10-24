@@ -48,10 +48,10 @@ const Dashboard = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 1024 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 10MB",
+        description: "Maximum file size is 1GB",
         variant: "destructive",
       });
       return;
@@ -67,12 +67,54 @@ const Dashboard = () => {
       try {
         matchData = JSON.parse(fileContent);
       } catch {
-        toast({
-          title: "Invalid file",
-          description: "Please upload a valid JSON file",
-          variant: "destructive",
-        });
-        return;
+        // Non-JSON file: upload raw file to Supabase Storage and insert metadata-only record
+        try {
+          const filePath = `${user.id}/${Date.now()}-${file.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from("uploads")
+            .upload(filePath, file, {
+              contentType: file.type || undefined,
+              upsert: false,
+            });
+
+          if (uploadError) {
+            throw uploadError;
+          }
+
+          const { data: publicUrlData } = supabase.storage
+            .from("uploads")
+            .getPublicUrl(filePath);
+
+          const fileUrl = publicUrlData.publicUrl;
+
+          const { error: insertError } = await supabase
+            .from("matches")
+            .insert({
+              user_id: user.id,
+              game_type: "Unknown",
+              file_name: file.name,
+              raw_data: null,
+              status: "uploaded",
+              file_url: fileUrl,
+            });
+
+          if (insertError) throw insertError;
+
+          toast({
+            title: "File uploaded",
+            description: "Stored file successfully. JSON analysis is only run for JSON files.",
+          });
+
+          fetchMatches();
+          return;
+        } catch (e: any) {
+          toast({
+            title: "Upload failed",
+            description: e.message || "Could not upload file",
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       // Insert match
@@ -200,11 +242,10 @@ const Dashboard = () => {
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-lg font-medium mb-2">Drop your match file here</p>
               <p className="text-sm text-muted-foreground mb-4">
-                Support for JSON format (Max 10MB)
+                Support for JSON format (Max 1GB)
               </p>
               <Input
                 type="file"
-                accept=".json"
                 onChange={handleFileUpload}
                 className="hidden"
                 id="file-upload"
@@ -261,6 +302,17 @@ const Dashboard = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
+                      {match.file_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                        >
+                          <a href={match.file_url} target="_blank" rel="noopener noreferrer">
+                            Open File
+                          </a>
+                        </Button>
+                      )}
                       {match.status === "analyzed" && (
                         <Button
                           variant="outline"
